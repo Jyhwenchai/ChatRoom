@@ -74,19 +74,6 @@ open class ChatRoomViewController: UIViewController {
         return tableView
     }()
     
-    /// Example View
-    lazy var emojiView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: view.height, width: view.width, height: 200))
-        view.backgroundColor = UIColor.systemYellow
-        return view
-    }()
-    
-    lazy var moreView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: view.height, width: view.width, height: 400))
-        view.backgroundColor = UIColor.systemPink
-        return view
-    }()
-    
     open override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
