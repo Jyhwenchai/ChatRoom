@@ -119,10 +119,8 @@ extension ViewController {
         return cell
     }
     
-}
-
-extension ViewController {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return viewModel.cellHeight(at: indexPath)
     }
+    
 }

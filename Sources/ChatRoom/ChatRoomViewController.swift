@@ -370,6 +370,9 @@ extension ChatRoomViewController: UITableViewDataSource {
         return UITableViewCell()
     }
     
+    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        0
+    }
 }
 
 
@@ -498,7 +501,8 @@ extension ChatRoomViewController: InputViewDelegate {
             hiddenAccessoryView(oldAccessoryView)
         }
         switch newAccessoryView {
-        case .input: break // 显示由 keyboardWillShowNotification 通知处理
+        case .input:
+            pingInputViewToBottom = false // 显示由 keyboardWillShowNotification 通知处理
         case .selected:
             showAccessoryView(newAccessoryView)
         }
