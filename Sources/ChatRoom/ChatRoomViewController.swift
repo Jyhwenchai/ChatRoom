@@ -184,9 +184,11 @@ open class ChatRoomViewController: UIViewController {
             self.refreshState = .updatingUI
             self.indicatorView.stopAnimating()
             
-            let reloadBeforeCount = self.tableView.numberOfRows(inSection: 0)
+            let beforeContentHeight = self.tableView.contentSize.height
+//            let reloadBeforeCount = self.tableView.numberOfRows(inSection: 0)
             self.tableView.reloadData()
-            let reloadEndCount = self.tableView.numberOfRows(inSection: 0)
+//            let reloadEndCount = self.tableView.numberOfRows(inSection: 0)
+            let currentContentHeight = self.tableView.contentSize.height
             
             if !self.hasHistoryMessage() {
                 self.tableView.tableHeaderView = nil
@@ -195,11 +197,9 @@ open class ChatRoomViewController: UIViewController {
             self.tableView.setNeedsLayout()
             self.tableView.layoutIfNeeded()
             // keep the original position of cells.
-            let addCellsCount = reloadEndCount - reloadBeforeCount
-            if let cell = self.tableView.cellForRow(at: IndexPath(row: addCellsCount - 1, section: 0)) {
-                let contentOffset = cell.maxY - tableHeaderHeight + self.tableView.contentOffset.y
-                self.tableView.setContentOffset(CGPoint(x: 0, y: contentOffset) , animated: false)
-            }
+            let addContentHeight = currentContentHeight - beforeContentHeight
+            let contentOffset = addContentHeight + self.tableView.contentOffset.y
+            self.tableView.setContentOffset(CGPoint(x: 0, y: contentOffset), animated: false)
             self.refreshState = .normal
         }
        

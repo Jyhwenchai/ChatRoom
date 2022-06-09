@@ -21,19 +21,28 @@ class ViewController: ChatRoomViewController {
         navigationItem.rightBarButtonItems = [barItem]
         bindData()
         initView()
-    
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            var addMessages: [TextModel] = []
+            for index in 0..<26 {
+                let model = TextModel(text: "new message \(self.viewModel.count) - \(index)", direction: .left, contentSize: CGSize(width: 200, height: 40))
+                addMessages.append(model)
+            }
+            self.viewModel.messages.append(contentsOf: addMessages)
+            self.reloadDataWhenDataFirstLoad()
+        }
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        reloadDataWhenDataFirstLoad()
+//        reloadDataWhenDataFirstLoad()
     }
     
     @objc func testAction() {
         viewModel.messages.removeAll()
 //        indicatorView.stopAnimating()
         tableView.tableHeaderView = nil
-        tableView.reloadData()
+        reloadDataWhenLoadingPage()
     }
     
     func initView() {

@@ -17,12 +17,6 @@ class ChatViewModel {
     var loadHistoryMessageCompleteHandler: ((Int) -> Void)?
     
     init() {
-        var addMessages: [TextModel] = []
-        for index in 0..<20 {
-            let model = TextModel(text: "new message \(count) - \(index)", direction: .left, contentSize: CGSize(width: 200, height: 40))
-            addMessages.append(model)
-        }
-        messages.append(contentsOf: addMessages)
     }
     
     func addMessage(_ text: String) {
@@ -74,5 +68,14 @@ class ChatViewModel {
         count += 10
         messages.insert(contentsOf: addMessages, at: 0)
         loadHistoryMessageCompleteHandler?(addMessages.count)
+    }
+    
+    func loadData() {
+        var addMessages: [TextModel] = []
+        for index in 0..<6 {
+            let model = TextModel(text: "new message \(count) - \(index)", direction: .left, contentSize: CGSize(width: 200, height: 40))
+            addMessages.append(model)
+        }
+        messages.append(contentsOf: addMessages)
     }
 }
