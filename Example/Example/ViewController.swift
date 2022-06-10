@@ -108,8 +108,7 @@ class ViewController: ChatRoomViewController {
     }
     
     override func hasHistoryMessage() -> Bool {
-        return true
-//        return false
+        return viewModel.count < 30
     }
     
 }

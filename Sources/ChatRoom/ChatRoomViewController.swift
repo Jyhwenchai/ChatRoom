@@ -185,9 +185,7 @@ open class ChatRoomViewController: UIViewController {
             self.indicatorView.stopAnimating()
             
             let beforeContentHeight = self.tableView.contentSize.height
-//            let reloadBeforeCount = self.tableView.numberOfRows(inSection: 0)
             self.tableView.reloadData()
-//            let reloadEndCount = self.tableView.numberOfRows(inSection: 0)
             let currentContentHeight = self.tableView.contentSize.height
             
             if !self.hasHistoryMessage() {
@@ -198,7 +196,10 @@ open class ChatRoomViewController: UIViewController {
             self.tableView.layoutIfNeeded()
             // keep the original position of cells.
             let addContentHeight = currentContentHeight - beforeContentHeight
-            let contentOffset = addContentHeight + self.tableView.contentOffset.y
+            var contentOffset = addContentHeight + self.tableView.contentOffset.y
+            if !self.hasHistoryMessage() {
+                contentOffset -= tableHeaderHeight
+            }
             self.tableView.setContentOffset(CGPoint(x: 0, y: contentOffset), animated: false)
             self.refreshState = .normal
         }
