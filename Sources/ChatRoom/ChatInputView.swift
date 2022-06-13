@@ -108,14 +108,14 @@ public class ChatInputView: UIView {
             reduceWidth += frame.width
         }
         
-        let remainWidth = bounds.width - reduceWidth
+        let remainWidth = bounds.width - reduceWidth - contentInsets.left - contentInsets.right
         textField.frame = CGRect(x: groupViewMaxX, y: inputMarginSpacing / 2, width: remainWidth, height: contentView.height - inputMarginSpacing)
     }
     
     
     public func addLeftAccessoryViews(@InputAccessoryBuilder _ viewBuilder: () -> InputAccessoryViewGroup) {
         leftAccessoryViewGroup = viewBuilder()
-        addSubview(leftAccessoryViewGroup!.titleGroupView())
+        contentView.addSubview(leftAccessoryViewGroup!.titleGroupView())
         leftAccessoryViewGroup?.selectedClosure = { [weak self] view in
             guard let self = self else { return }
             self.updateSelectedAccessoryView(view, direction: .left)
@@ -124,7 +124,7 @@ public class ChatInputView: UIView {
     
     public func addRightAccessoryViews(@InputAccessoryBuilder _ viewBuilder: () -> InputAccessoryViewGroup) {
         rightAccessoryViewGroup = viewBuilder()
-        addSubview(rightAccessoryViewGroup!.titleGroupView())
+        contentView.addSubview(rightAccessoryViewGroup!.titleGroupView())
         rightAccessoryViewGroup?.selectedClosure = { [weak self] view in
             guard let self = self else { return }
             self.updateSelectedAccessoryView(view, direction: .right)
