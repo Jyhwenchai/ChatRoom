@@ -8,8 +8,6 @@
 import UIKit
 
 private let tabBarAdditionHeight: CGFloat = ChatRoomContant.bottomSafeAreaHeight
-private let tableHeaderHeight: CGFloat = 30.0
-private let tableFooterHeight: CGFloat = 12.0
 
 open class ChatRoomViewController: UIViewController {
 
@@ -20,6 +18,12 @@ open class ChatRoomViewController: UIViewController {
     public var delayImmediateUpdateUITimeInterval: UInt32 = 150_000
     
     public var globalAnimateTimeInterval: TimeInterval = 0.25
+   
+    /// Define pull up loading view height.
+    public let tableHeaderHeight: CGFloat = 30.0
+    
+    /// TableView last cell spacing with input view.
+    public let tableFooterHeight: CGFloat = 12.0
     
     private var keyboardWillShowToken: NSObjectProtocol?
     
@@ -48,6 +52,12 @@ open class ChatRoomViewController: UIViewController {
     }
     
     //MARK: - Views
+    public var chatInputBottomAttachView: UIView? {
+        didSet {
+            chatInputView.bottomAttachView = chatInputBottomAttachView
+            layoutViews()
+        }
+    }
     public let chatInputView: ChatInputView = ChatInputView()
     let indicatorView: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 15, height: 15))
@@ -71,6 +81,9 @@ open class ChatRoomViewController: UIViewController {
         tableView.dataSource = self
         tableView.separatorColor = .clear
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: tableFooterHeight))
+        tableView.estimatedRowHeight = 0
+        tableView.estimatedSectionFooterHeight = 0
+        tableView.estimatedSectionHeaderHeight = 0
         return tableView
     }()
     
@@ -91,16 +104,11 @@ open class ChatRoomViewController: UIViewController {
         
         func initView() {
             view.backgroundColor = UIColor(red: 241.0/255, green: 241.0/255, blue: 241/255, alpha: 1)
-            
-            let inputViewMinHeight = chatInputView.minHeight
-            var frame = view.bounds
-            frame.size.height = view.height - inputViewMinHeight - tabBarAdditionHeight
-            tableView.frame = frame
+            layoutViews()
             view.addSubview(tableView)
-            
-            chatInputView.frame = CGRect(x: 0, y: frame.height, width: view.width, height: inputViewMinHeight)
             view.addSubview(chatInputView)
             chatInputView.delegate = self
+            
         }
 
         func initBind() {
@@ -150,11 +158,20 @@ open class ChatRoomViewController: UIViewController {
         initBind()
         initNotification()
     }
+    
+    func layoutViews() {
+        let inputViewMinHeight = chatInputView.minHeight
+        var frame = view.bounds
+        frame.size.height = view.height - inputViewMinHeight - tabBarAdditionHeight
+        tableView.frame = frame
+        chatInputView.frame = CGRect(x: 0, y: frame.height, width: view.width, height: inputViewMinHeight)
+        view.setNeedsLayout()
+    }
 
     deinit {
-        keyboardWillShowToken = nil
+        NotificationCenter.default.removeObserver(keyboardWillShowToken!)
     }
-    
+
     //MARK: Main Method
     
     /// Reload data and update UI immediately when drag tableView and refreshState is `loadingDataCompleted`
@@ -198,7 +215,7 @@ open class ChatRoomViewController: UIViewController {
             let addContentHeight = currentContentHeight - beforeContentHeight
             var contentOffset = addContentHeight + self.tableView.contentOffset.y
             if !self.hasHistoryMessage() {
-                contentOffset -= tableHeaderHeight
+                contentOffset -= self.tableHeaderHeight
             }
             self.tableView.setContentOffset(CGPoint(x: 0, y: contentOffset), animated: false)
             self.refreshState = .normal
@@ -294,18 +311,20 @@ open class ChatRoomViewController: UIViewController {
     public func reloadDataWhenDataFirstLoad() {
         defer { viewDidLayout = true }
         if viewDidLayout { return }
-        tableView.reloadData()
-        tableView.setNeedsLayout()
-        tableView.layoutIfNeeded()
+
         // The default tableView.contentOffset.y value is -tableView.safeAreaInsets.top
-        let cellHeight = calculateTableViewCellTotalHeight()
-        var offset = cellHeight + tableFooterHeight - tableView.height
         if hasHistoryMessage() {
-            offset += tableHeaderHeight
             tableView.tableHeaderView = tableHeaderView
+            tableView.reloadData()
+            let cellHeight = calculateTableViewCellTotalHeight()
+            var offset = cellHeight + tableFooterHeight - tableView.height
+            offset += tableHeaderHeight
             tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
         } else {
-            if  offset <= tableView.contentOffset.y { return }
+            tableView.reloadData()
+            let cellHeight = calculateTableViewCellTotalHeight()
+            let offset = cellHeight + tableFooterHeight - tableView.height
+            if offset <= tableView.contentOffset.y { return }
             tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
         }
     }
@@ -486,7 +505,7 @@ extension ChatRoomViewController:  UITableViewDelegate {
         
         var contentHeight: CGFloat = 0
         for index in 0..<numberOfCount {
-            let cellHeight = tableView.delegate!.tableView!(tableView, heightForRowAt: IndexPath(row: index, section: 0))
+            let cellHeight = tableView(tableView, heightForRowAt: IndexPath(row: index, section: 0))
             contentHeight += cellHeight
         }
         return contentHeight

@@ -51,6 +51,13 @@ public class ChatInputView: UIView {
     
     let lineView = UIView()
     let contentView = UIView()
+    public var bottomAttachView: UIView? {
+        didSet {
+            if let bottomAttachView {
+                addSubview(bottomAttachView)
+            }
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,7 +76,11 @@ public class ChatInputView: UIView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         
-        contentView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        let bottomAttachSize = bottomAttachView?.sizeThatFits(.zero) ?? .zero
+        if let bottomAttachView {
+            bottomAttachView.frame = CGRect(x: 0, y: height - bottomAttachSize.height, width: width, height: bottomAttachSize.height)
+        }
+        contentView.frame = CGRect(x: 0, y: 0, width: width, height: height - bottomAttachSize.height)
         lineView.frame = CGRect(x: 0, y: 0, width: contentView.width, height: 1)
         
         var reduceWidth: CGFloat = 0
@@ -77,7 +88,8 @@ public class ChatInputView: UIView {
         if let leftAccessoryViewGroup = leftAccessoryViewGroup {
             let groupView = leftAccessoryViewGroup.titleGroupView()
             var frame = groupView.frame
-            frame.size.height = bounds.height
+            frame.size.height = minInputHeight + inputMarginSpacing
+            frame.origin.y = contentView.height - frame.size.height
             groupView.frame = frame
             reduceWidth += frame.width
             groupViewMaxX = frame.width
@@ -87,13 +99,14 @@ public class ChatInputView: UIView {
             let groupView = rightAccessoryViewGroup.titleGroupView()
             var frame = groupView.frame
             frame.origin.x = bounds.width - frame.width
-            frame.size.height = bounds.height
+            frame.size.height = minInputHeight + inputMarginSpacing
+            frame.origin.y = contentView.height - frame.size.height
             groupView.frame = frame
             reduceWidth += frame.width
         }
         
         let remainWidth = bounds.width - reduceWidth
-        textField.frame = CGRect(x: groupViewMaxX, y: inputMarginSpacing / 2, width: remainWidth, height: height - inputMarginSpacing)
+        textField.frame = CGRect(x: groupViewMaxX, y: inputMarginSpacing / 2, width: remainWidth, height: contentView.height - inputMarginSpacing)
     }
     
     
@@ -169,7 +182,8 @@ extension ChatInputView: UITextViewDelegate {
     public func textViewDidChange(_ textView: UITextView) {
         if let _ = textView.text {
             let size = textView.sizeThatFits(CGSize(width: textView.width, height: 0))
-            let viewHeight: CGFloat = min(max(ceil(size.height), minInputHeight), maxInputHeight) + inputMarginSpacing
+            let bottomAccessoryViewHeight = bottomAttachView?.sizeThatFits(.zero).height ?? 0
+            let viewHeight: CGFloat = min(max(ceil(size.height), minInputHeight), maxInputHeight) + bottomAccessoryViewHeight + inputMarginSpacing
             if viewHeight != height {
                 updateFrameClosure?(viewHeight)
             }
@@ -180,10 +194,10 @@ extension ChatInputView: UITextViewDelegate {
 
 extension ChatInputView {
     var minHeight: CGFloat {
-        minInputHeight + inputMarginSpacing
+        minInputHeight + inputMarginSpacing + (bottomAttachView?.sizeThatFits(.zero).height ?? 0)
     }
     
     var maxHeight: CGFloat {
-        maxInputHeight + inputMarginSpacing
+        maxInputHeight + inputMarginSpacing + (bottomAttachView?.sizeThatFits(.zero).height ?? 0)
     }
 }

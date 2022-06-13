@@ -81,6 +81,12 @@ class ViewController: ChatRoomViewController {
             InputAccessoryView(titleView: button2, contentView: contentView2)
             InputAccessoryView(titleView: button3, contentView: contentView3)
         }
+        
+        let bottomAttachView = UIButton()
+        bottomAttachView.setTitle("Hello, SwiftUI", for: .normal)
+        bottomAttachView.backgroundColor = .purple
+        bottomAttachView.contentEdgeInsets = UIEdgeInsets(top: 5, left: 0, bottom: 5, right: 0)
+        chatInputBottomAttachView = bottomAttachView
     }
     
     func bindData() {
