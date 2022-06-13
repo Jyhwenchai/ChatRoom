@@ -333,7 +333,7 @@ open class ChatRoomViewController: UIViewController {
     
     private func showInputAccessoryContentView(_ componentView: InputAssessoryContentViewProtocol) {
         if componentView.position == .coverInput {
-            componentView.frame = chatInputView.textField.frame
+            componentView.frame = chatInputView.textView.frame
             chatInputView.contentView.addSubview(componentView)
         } else {
             let viewHeight = componentView.sizeThatFits(.zero).height
@@ -360,7 +360,7 @@ open class ChatRoomViewController: UIViewController {
 
     //MARK: Implemented by subclasses
     /// Implemented by subclasses
-    open func inputViewConfirmInput(_ text: String) {
+    open func inputViewConfirmInput(_ attributedText: NSAttributedString) {
     }
 
     

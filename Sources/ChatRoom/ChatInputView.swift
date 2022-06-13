@@ -34,13 +34,13 @@ public class ChatInputView: UIView {
     
     weak var delegate: InputViewDelegate?
     
-    var confirmInputClosure: ((String) -> Void)?
+    var confirmInputClosure: ((NSAttributedString) -> Void)?
     var updateFrameClosure: ((CGFloat) -> Void)?
     
     /// available left and right
     public var contentInsets = UIEdgeInsets.zero
     
-    public let textField: UITextView = {
+    public let textView: UITextView = {
         let textField = UITextView()
         textField.backgroundColor = UIColor.white
         textField.font = UIFont.systemFont(ofSize: 16)
@@ -65,9 +65,9 @@ public class ChatInputView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor(red: 241.0/255, green: 241.0/255, blue: 241/255, alpha: 1)
-        textField.delegate = self
+        textView.delegate = self
         addSubview(contentView)
-        contentView.addSubview(textField)
+        contentView.addSubview(textView)
         contentView.addSubview(lineView)
         lineView.backgroundColor = UIColor(red: 225.0/255, green: 225.0/255, blue: 225/255, alpha: 1)
     }
@@ -109,7 +109,7 @@ public class ChatInputView: UIView {
         }
         
         let remainWidth = bounds.width - reduceWidth - contentInsets.left - contentInsets.right
-        textField.frame = CGRect(x: groupViewMaxX, y: inputMarginSpacing / 2, width: remainWidth, height: contentView.height - inputMarginSpacing)
+        textView.frame = CGRect(x: groupViewMaxX, y: inputMarginSpacing / 2, width: remainWidth, height: contentView.height - inputMarginSpacing)
     }
     
     
@@ -173,8 +173,8 @@ extension ChatInputView: UITextViewDelegate {
     
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if text == "\n" {
-            if let text = textView.text {
-                textView.text = nil
+            if let text = textView.attributedText {
+                textView.attributedText = nil
                 confirmInputClosure?(text)
             }
             return false

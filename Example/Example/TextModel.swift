@@ -14,7 +14,7 @@ struct TextModel {
         case right
     }
 
-    var text: String
+    var text: NSAttributedString
     var direction: Direction
     var contentSize: CGSize
 }

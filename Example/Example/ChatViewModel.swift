@@ -19,20 +19,20 @@ class ChatViewModel {
     init() {
     }
     
-    func addMessage(_ text: String) {
+    func addMessage(_ attributedText: NSAttributedString) {
         let direction: TextModel.Direction = Int8.random(in: 1...Int8.max) % 2 == 0 ? .left : .right
-        let size = calculateMessageSize(text)
-        let model = TextModel(text: text, direction: direction, contentSize: size)
+        let size = calculateMessageSize(attributedText)
+        let model = TextModel(text: attributedText, direction: direction, contentSize: size)
         messages.append(model)
         addNewMessageCompleteHandler?()
     }
     
     
-    private func calculateMessageSize(_ message: String) -> CGSize {
+    private func calculateMessageSize(_ message: NSAttributedString) -> CGSize {
         
         var contentSize: CGSize = .zero
         
-        let desc = message as NSString
+        let desc = message.string as NSString
         let style = NSMutableParagraphStyle()
         style.alignment = .left
         style.lineBreakMode = .byWordWrapping
@@ -41,7 +41,8 @@ class ChatViewModel {
         let bubbleMargin: CGFloat = 169.0
         
         let screenWidth = UIScreen.main.bounds.width
-        contentSize = desc.boundingRect(with: CGSize(width: screenWidth - textMargin, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: UIFont.systemFont(ofSize: 14), .paragraphStyle: style], context: nil).size
+        contentSize = message.boundingRect(with: CGSize(width: screenWidth - textMargin, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil).size
+//        contentSize = desc.boundingRect(with: CGSize(width: screenWidth - textMargin, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: UIFont.systemFont(ofSize: 14), .paragraphStyle: style], context: nil).size
 
         let minBubbleHeight: CGFloat = 40.0
         let bubbleHorizontalPadding: CGFloat = 24
@@ -62,7 +63,8 @@ class ChatViewModel {
     func loadMoreMessage() {
         var addMessages: [TextModel] = []
         for index in 0..<10 {
-            let model = TextModel(text: "new message \(count) - \(index)", direction: .left, contentSize: CGSize(width: 200, height: 40))
+            let attributedText = NSAttributedString(string: "new message \(count) - \(index)")
+            let model = TextModel(text: attributedText, direction: .left, contentSize: CGSize(width: 200, height: 40))
             addMessages.append(model)
         }
         count += 10
@@ -73,7 +75,8 @@ class ChatViewModel {
     func loadData() {
         var addMessages: [TextModel] = []
         for index in 0..<6 {
-            let model = TextModel(text: "new message \(count) - \(index)", direction: .left, contentSize: CGSize(width: 200, height: 40))
+            let attributedText = NSAttributedString(string: "new message \(count) - \(index)")
+            let model = TextModel(text: attributedText, direction: .left, contentSize: CGSize(width: 200, height: 40))
             addMessages.append(model)
         }
         messages.append(contentsOf: addMessages)

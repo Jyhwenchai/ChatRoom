@@ -25,7 +25,8 @@ class ViewController: ChatRoomViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             var addMessages: [TextModel] = []
             for index in 0..<26 {
-                let model = TextModel(text: "new message \(self.viewModel.count) - \(index)", direction: .left, contentSize: CGSize(width: 200, height: 40))
+                let attributedText = NSAttributedString(string: "new message \(self.viewModel.count) - \(index)")
+                let model = TextModel(text: attributedText, direction: .left, contentSize: CGSize(width: 200, height: 40))
                 addMessages.append(model)
             }
             self.viewModel.messages.append(contentsOf: addMessages)
@@ -39,10 +40,23 @@ class ViewController: ChatRoomViewController {
     }
     
     @objc func testAction() {
-        viewModel.messages.removeAll()
+//        viewModel.messages.removeAll()
 //        indicatorView.stopAnimating()
-        tableView.tableHeaderView = nil
-        reloadDataWhenLoadingPage()
+//        tableView.tableHeaderView = nil
+//        reloadDataWhenLoadingPage()
+        let attributedText = chatInputView.textView.attributedText!
+        let image = UIImage(named: "ej_1")!
+        let attachData = NSTextAttachment(image: image)
+      
+        let lineHeight = chatInputView.textView.font!.lineHeight
+        let spacing = chatInputView.textView.font!.descender
+        attachData.bounds = CGRect(x: 0, y: spacing, width: lineHeight, height: lineHeight)
+        let emojiSymbol = NSAttributedString(attachment: attachData)
+        let mutableAttributedText = NSMutableAttributedString(attributedString: attributedText)
+        mutableAttributedText.append(emojiSymbol)
+        mutableAttributedText.addAttribute(.font, value: UIFont.systemFont(ofSize: 16), range: NSMakeRange(0, mutableAttributedText.length))
+        chatInputView.textView.attributedText = mutableAttributedText
+        
     }
     
     func initView() {
@@ -101,9 +115,12 @@ class ViewController: ChatRoomViewController {
         }
     }
     
-    override func inputViewConfirmInput(_ text: String) {
-        // keyboard return event
-        viewModel.addMessage(text)
+//    override func inputViewConfirmInput(_ text: String) {
+//        // keyboard return event
+//        viewModel.addMessage(text)
+//    }
+    override func inputViewConfirmInput(_ attributedText: NSAttributedString) {
+        viewModel.addMessage(attributedText)
     }
     
     override func loadingHistoryMessages(completion: (Bool) -> Void) {

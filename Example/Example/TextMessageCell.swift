@@ -53,7 +53,7 @@ class TextMessageCell: UITableViewCell {
     }
     
     func configureCellWith(model: TextModel) {
-        messageView.textView.text = model.text
+        messageView.textView.attributedText = model.text
         contentSize = model.contentSize
         isSender = model.direction == .right
         if model.direction == .left {
