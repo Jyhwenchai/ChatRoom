@@ -83,7 +83,7 @@ public class ChatInputView: UIView {
         if let bottomAttachView {
             bottomAttachView.frame = CGRect(x: 0, y: height - bottomAttachSize.height, width: width, height: bottomAttachSize.height)
         }
-        contentView.frame = CGRect(x: contentInsets.left, y: 0, width: width - contentInsets.right, height: height - bottomAttachSize.height)
+        contentView.frame = CGRect(x: contentInsets.left, y: 0, width: width - contentInsets.left - contentInsets.right, height: height - bottomAttachSize.height)
         lineView.frame = CGRect(x: 0, y: 0, width: contentView.width, height: 1)
         
         var reduceWidth: CGFloat = 0
