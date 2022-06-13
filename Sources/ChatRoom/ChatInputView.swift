@@ -101,7 +101,7 @@ public class ChatInputView: UIView {
         if let rightAccessoryViewGroup = rightAccessoryViewGroup {
             let groupView = rightAccessoryViewGroup.titleGroupView()
             var frame = groupView.frame
-            frame.origin.x = bounds.width - frame.width
+            frame.origin.x = contentView.width - frame.width
             frame.size.height = minInputHeight + inputMarginSpacing
             frame.origin.y = contentView.height - frame.size.height
             groupView.frame = frame
