@@ -40,7 +40,7 @@ public class ChatInputView: UIView {
     /// available left and right
     public var contentInsets = UIEdgeInsets.zero
     
-    let textField: UITextView = {
+    public let textField: UITextView = {
         let textField = UITextView()
         textField.backgroundColor = UIColor.white
         textField.font = UIFont.systemFont(ofSize: 16)
