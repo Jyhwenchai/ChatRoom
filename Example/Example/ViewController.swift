@@ -45,9 +45,16 @@ class ViewController: ChatRoomViewController {
 //        tableView.tableHeaderView = nil
 //        reloadDataWhenLoadingPage()
         let attributedText = chatInputView.textView.attributedText!
-        let image = UIImage(named: "ej_1")!
-        let attachData = NSTextAttachment(data: nil, ofType: "ej_1")
-        attachData.image = image
+//        let image = UIImage(named: "ej_1")!
+//        let fileWrapper = FileWrapper(regularFileWithContents: image.pngData()!)
+//        fileWrapper.preferredFilename = "ej_1.png"
+//        let attachData = NSTextAttachment()
+//        attachData.fileWrapper = fileWrapper
+        
+//        let attachData = NSTextAttachment(data: nil, ofType: "ej_1")
+//        attachData.fileWrapper?.fileAttributes = ["hello": "word"]
+//        attachData.image = image
+        let attachData = EmojiAttachment(emoji: Emoji(name: "ej_1", desc: "[hello]"))
       
         let lineHeight = chatInputView.textView.font!.lineHeight
         let spacing = chatInputView.textView.font!.descender
@@ -57,6 +64,19 @@ class ViewController: ChatRoomViewController {
         mutableAttributedText.append(emojiSymbol)
         mutableAttributedText.addAttribute(.font, value: UIFont.systemFont(ofSize: 16), range: NSMakeRange(0, mutableAttributedText.length))
         chatInputView.textView.attributedText = mutableAttributedText
+        
+        var formatString = ""
+        mutableAttributedText.enumerateAttributes(in: NSMakeRange(0, mutableAttributedText.length)) { attributes, range, stop in
+            if attributes.contains { $0.key == .attachment } {
+                if let attachment = attributes[.attachment] as? EmojiAttachment {
+                    formatString.append(attachment.emoji.desc)
+                }
+            } else {
+                let subString = mutableAttributedText.attributedSubstring(from: range)
+                formatString.append(subString.string)
+            }
+            print(formatString)
+        }
         
     }
     

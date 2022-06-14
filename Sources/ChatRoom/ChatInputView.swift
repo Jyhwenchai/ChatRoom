@@ -77,7 +77,8 @@ public class ChatInputView: UIView {
         
         textView.publisher(for: \.attributedText)
             .sink { [weak self] attributedText in
-                self?.textDidChangedClosure?(attributedText)
+                guard let self = self else { return }
+                self.textViewDidChange(self.textView)
             }
             .store(in: &cancellable)
         

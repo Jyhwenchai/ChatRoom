@@ -18,3 +18,22 @@ struct TextModel {
     var direction: Direction
     var contentSize: CGSize
 }
+
+
+struct Emoji {
+    var name: String
+    var desc: String
+}
+
+class EmojiAttachment: NSTextAttachment {
+    var emoji: Emoji
+    init(emoji: Emoji) {
+        self.emoji = emoji
+        super.init(data: nil, ofType: nil)
+        image = UIImage(named: emoji.name)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
