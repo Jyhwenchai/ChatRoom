@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 private let maxInputHeight: CGFloat = 100.0
 private let minInputHeight: CGFloat = 36.0
@@ -63,6 +64,8 @@ public class ChatInputView: UIView {
         }
     }
     
+    var cancellable = Set<AnyCancellable>()
+    var observation: NSKeyValueObservation?
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor(red: 241.0/255, green: 241.0/255, blue: 241/255, alpha: 1)
@@ -71,6 +74,13 @@ public class ChatInputView: UIView {
         contentView.addSubview(textView)
         contentView.addSubview(lineView)
         lineView.backgroundColor = UIColor(red: 225.0/255, green: 225.0/255, blue: 225/255, alpha: 1)
+        
+        textView.publisher(for: \.attributedText)
+            .sink { [weak self] attributedText in
+                self?.textDidChangedClosure?(attributedText)
+            }
+            .store(in: &cancellable)
+        
     }
     
     required init?(coder: NSCoder) {

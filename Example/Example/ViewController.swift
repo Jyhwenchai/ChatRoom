@@ -46,7 +46,8 @@ class ViewController: ChatRoomViewController {
 //        reloadDataWhenLoadingPage()
         let attributedText = chatInputView.textView.attributedText!
         let image = UIImage(named: "ej_1")!
-        let attachData = NSTextAttachment(image: image)
+        let attachData = NSTextAttachment(data: nil, ofType: "ej_1")
+        attachData.image = image
       
         let lineHeight = chatInputView.textView.font!.lineHeight
         let spacing = chatInputView.textView.font!.descender
@@ -115,10 +116,10 @@ class ViewController: ChatRoomViewController {
         }
     }
     
-//    override func inputViewConfirmInput(_ text: String) {
-//        // keyboard return event
-//        viewModel.addMessage(text)
-//    }
+    override func inputViewTextDidChanged(_ attributed: NSAttributedString?) {
+        print(attributed)
+    }
+    
     override func inputViewConfirmInput(_ attributedText: NSAttributedString) {
         viewModel.addMessage(attributedText)
     }
