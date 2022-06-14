@@ -186,8 +186,8 @@ extension ChatInputView: UITextViewDelegate {
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if text == "\n" {
             if let text = textView.attributedText {
-                textView.attributedText = nil
                 confirmInputClosure?(text)
+                textView.attributedText = nil
             }
             return false
         }
