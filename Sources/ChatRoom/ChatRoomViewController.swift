@@ -138,6 +138,10 @@ open class ChatRoomViewController: UIViewController {
                     self.layoutTableView(with: self.inputAccessoryContentViewFrame)
                 }
             }
+            
+            chatInputView.textDidChangedClosure = { [weak self] in
+                self?.inputViewTextDidChanged($0)
+            }
         }
         
         func initNotification() {
@@ -359,6 +363,9 @@ open class ChatRoomViewController: UIViewController {
     }
 
     //MARK: Implemented by subclasses
+    open func inputViewTextDidChanged(_ attributed: NSAttributedString?) {
+    }
+    
     /// Implemented by subclasses
     open func inputViewConfirmInput(_ attributedText: NSAttributedString) {
     }

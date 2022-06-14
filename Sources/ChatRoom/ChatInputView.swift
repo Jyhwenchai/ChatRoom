@@ -35,6 +35,7 @@ public class ChatInputView: UIView {
     weak var delegate: InputViewDelegate?
     
     var confirmInputClosure: ((NSAttributedString) -> Void)?
+    var textDidChangedClosure: ((NSAttributedString?) -> Void)?
     var updateFrameClosure: ((CGFloat) -> Void)?
     
     /// available left and right
@@ -183,7 +184,8 @@ extension ChatInputView: UITextViewDelegate {
     }
     
     public func textViewDidChange(_ textView: UITextView) {
-        if let _ = textView.text {
+        textDidChangedClosure?(textView.attributedText)
+        if let _ = textView.attributedText {
             let size = textView.sizeThatFits(CGSize(width: textView.width, height: 0))
             let bottomAccessoryViewHeight = bottomAttachView?.sizeThatFits(.zero).height ?? 0
             let viewHeight: CGFloat = min(max(ceil(size.height), minInputHeight), maxInputHeight) + bottomAccessoryViewHeight + inputMarginSpacing
