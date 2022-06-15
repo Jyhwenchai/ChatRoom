@@ -38,6 +38,9 @@ public class ChatInputView: UIView {
     var confirmInputClosure: ((NSAttributedString) -> Void)?
     var textDidChangedClosure: ((NSAttributedString?) -> Void)?
     var updateFrameClosure: ((CGFloat) -> Void)?
+    public var isHiddenSeperate: Bool = false {
+        didSet { lineView.isHidden = isHiddenSeperate }
+    }
     
     /// available left and right
     public var contentInsets = UIEdgeInsets.zero
@@ -56,7 +59,7 @@ public class ChatInputView: UIView {
     
     let lineView = UIView()
     let contentView = UIView()
-    public var bottomAttachView: UIView? {
+    var bottomAttachView: UIView? {
         didSet {
             if let bottomAttachView {
                 addSubview(bottomAttachView)
@@ -96,7 +99,7 @@ public class ChatInputView: UIView {
             bottomAttachView.frame = CGRect(x: 0, y: height - bottomAttachSize.height, width: width, height: bottomAttachSize.height)
         }
         contentView.frame = CGRect(x: contentInsets.left, y: 0, width: width - contentInsets.left - contentInsets.right, height: height - bottomAttachSize.height)
-        lineView.frame = CGRect(x: 0, y: 0, width: contentView.width, height: 1)
+        lineView.frame = CGRect(x: 0, y: 0, width: width, height: 1)
         
         var reduceWidth: CGFloat = 0
         var groupViewMaxX: CGFloat = 0

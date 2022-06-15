@@ -32,6 +32,56 @@ class ViewController: ChatRoomViewController {
             self.viewModel.messages.append(contentsOf: addMessages)
             self.reloadDataWhenDataFirstLoad()
         }
+        
+        do {
+            let text = "[微笑]123[微笑][微了][微笑]01234[微笑]dfdf[微笑]"
+            let attributedText = NSMutableAttributedString()
+            let regex = try NSRegularExpression(pattern: #"[\u0391-\uFFE5]+]"#)
+            let results = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            var lastRange: NSRange = NSRange()
+            results.forEach {
+                let range = $0.range
+                let startIndex = text.index(text.startIndex, offsetBy: range.location-1)
+                let endIndex = text.index(text.startIndex, offsetBy: range.location+range.length)
+                
+                if let emojiDesc = text[startIndex..<endIndex] {
+                    let start = text.index(text.startIndex, offsetBy: lastRange.location + lastRange.length)
+                    var end = text.index(text.startIndex, offsetBy: range.location - 1)
+                    if emojiDesc != "[微笑]" {
+                        end = endIndex
+                    }
+                    let text = String(text[start..<end])
+                    attributedText.append(NSAttributedString(string: text))
+                    
+                    lastRange = range
+                    
+                    if emojiDesc == "[微笑]" {
+                        let inserLocation = attributedText.length
+                        let attachment = EmojiAttachment(emoji: Emoji(name: "ej_1", desc: "[微笑]"))
+                        let lineHeight = chatInputView.textView.font!.lineHeight
+                        let spacing = chatInputView.textView.font!.descender
+                        attachment.bounds = CGRect(x: 0, y: spacing, width: lineHeight, height: lineHeight)
+                        let emojiAttributedString = NSAttributedString(attachment: attachment)
+                        attributedText.insert(emojiAttributedString, at: inserLocation)
+                    }
+                }
+            }
+            
+            if let res = results.last {
+                let suffixStringStartPosition = res.range.location + res.range.length
+                let suffixStringEndPosition = text.count
+                if suffixStringStartPosition < suffixStringEndPosition {
+                    let startIndex = text.index(text.startIndex, offsetBy: suffixStringStartPosition)
+                    let endIndex = text.index(text.startIndex, offsetBy: suffixStringEndPosition)
+                    let text = text[startIndex..<endIndex]
+                    attributedText.append(NSAttributedString(string: String(text)))
+                }
+            }
+            attributedText.addAttribute(.font, value: UIFont.systemFont(ofSize: 16), range: NSMakeRange(0, attributedText.length))
+            chatInputView.textView.attributedText = attributedText
+        } catch {
+            
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -54,7 +104,7 @@ class ViewController: ChatRoomViewController {
 //        let attachData = NSTextAttachment(data: nil, ofType: "ej_1")
 //        attachData.fileWrapper?.fileAttributes = ["hello": "word"]
 //        attachData.image = image
-        let attachData = EmojiAttachment(emoji: Emoji(name: "ej_1", desc: "[hello]"))
+        let attachData = EmojiAttachment(emoji: Emoji(name: "ej_1", desc: "[微笑]"))
       
         let lineHeight = chatInputView.textView.font!.lineHeight
         let spacing = chatInputView.textView.font!.descender
@@ -75,8 +125,9 @@ class ViewController: ChatRoomViewController {
                 let subString = mutableAttributedText.attributedSubstring(from: range)
                 formatString.append(subString.string)
             }
-            print(formatString)
         }
+        print(formatString)
+       
         
     }
     
