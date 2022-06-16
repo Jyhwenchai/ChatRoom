@@ -22,7 +22,7 @@ class ViewController: ChatRoomViewController {
         bindData()
         initView()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now()) {
             var addMessages: [TextModel] = []
             for index in 0..<26 {
                 let attributedText = NSAttributedString(string: "new message \(self.viewModel.count) - \(index)")
