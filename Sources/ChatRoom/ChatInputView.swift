@@ -13,7 +13,9 @@ private let minInputHeight: CGFloat = 36.0
 private let inputMarginSpacing: CGFloat = 16
 
 protocol InputViewDelegate: NSObjectProtocol {
-    func inputView(_ inputView: ChatInputView, show newAccessoryView: ChatInputView.SelectAccessoryView, dismiss oldAccessoryView: ChatInputView.SelectAccessoryView?)
+    func inputView(_ inputView: ChatInputView,
+                   show newSelectAccessoryView: ChatInputView.SelectAccessoryView,
+                   dismiss oldSelectAccessoryView: ChatInputView.SelectAccessoryView?)
 }
 
 public class ChatInputView: UIView {

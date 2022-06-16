@@ -30,7 +30,7 @@ class ViewController: ChatRoomViewController {
                 addMessages.append(model)
             }
             self.viewModel.messages.append(contentsOf: addMessages)
-            self.reloadDataWhenDataFirstLoad()
+            self.layoutIfFirstLoadData()
         }
         
 //        let text = "[微笑]123[微笑][微了][微笑]01234[微笑]dfdf😁[微笑]😁123"
@@ -91,12 +91,12 @@ class ViewController: ChatRoomViewController {
     func bindData() {
         viewModel.addNewMessageCompleteHandler = { [weak self] in
             guard let self = self else { return }
-            self.layoutUIWhenReceiveMessage()
+            self.layoutIfReceiveMessage()
         }
         
         viewModel.loadHistoryMessageCompleteHandler = { [weak self] insertCount in
             guard let self = self else { return }
-            self.reloadDataWhenLoadingPage()
+            self.layoutIfLoadNewPageSuccess()
         }
     }
     
@@ -107,7 +107,7 @@ class ViewController: ChatRoomViewController {
         viewModel.addMessage(attributedText)
     }
     
-    override func loadingHistoryMessages(completion: (Bool) -> Void) {
+    override func startLoadingHistoryMessages(completion: (Bool) -> Void) {
         // load history message here, if `hasHistoryMessage` return true
         self.viewModel.loadMoreMessage()
         // return true, if loading successful. otherwise return false
