@@ -6,27 +6,13 @@
 //
 
 import UIKit
+import Combine
 
 public class InputAccessoryViewGroup {
-    
-    var selectedClosure: ((InputAccessoryView) -> Void)?
     
     var accessoryViews: [InputAccessoryView] = []
     init(accessoryViews: [InputAccessoryView]) {
         self.accessoryViews = accessoryViews
-        for (index, view) in accessoryViews.enumerated() {
-            view.index = index
-            let gesture = UITapGestureRecognizer(target: self, action: #selector(tapAction))
-            gesture.name = "\(view.index)"
-            view.titleView.isUserInteractionEnabled = true
-            view.titleView.addGestureRecognizer(gesture)
-        }
-    }
-    
-    @objc func tapAction(_ gesture: UITapGestureRecognizer) {
-        guard let flag = Int(gesture.name!) else { return }
-        let accessoryView = accessoryViews[flag]
-        selectedClosure?(accessoryView)
     }
     
     lazy var containerView: UIStackView = {
@@ -49,30 +35,38 @@ public class InputAccessoryViewGroup {
 }
 
 
-public class InputAccessoryView: UIView {
+public class InputAccessoryView: UIView, Identifiable {
     
-    let titleView: InputAccessoryTitleViewProtocol
-    let contentView: InputAssessoryContentViewProtocol
+    private let actionSubject: PassthroughSubject<Void, Never> = PassthroughSubject()
+    public var action: AnyPublisher<Void, Never> { actionSubject.eraseToAnyPublisher() }
     
-    var index: Int = 0
+    public var id = UUID().uuidString
+    
+    public let titleView: InputAccessoryTitleViewProtocol
+    public let contentView: InputAssessoryContentViewProtocol?
     
     public init(titleView: InputAccessoryTitleViewProtocol,
-         contentView: InputAssessoryContentViewProtocol) {
+         contentView: InputAssessoryContentViewProtocol? = nil) {
         self.titleView = titleView
         self.contentView = contentView
         super.init(frame: .zero)
+        
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(tapAction))
+        titleView.isUserInteractionEnabled = true
+        titleView.addGestureRecognizer(gesture)
     }
     
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    @objc func tapAction() {
+        actionSubject.send()
+    }
 }
 
 // MARK: -
-public protocol InputAccessoryTitleViewProtocol: UIView {
-    var isSelected: Bool { get set }
-}
+public protocol InputAccessoryTitleViewProtocol: UIView {}
 
 public enum ContentPosition {
     case coverInput
@@ -88,5 +82,9 @@ public struct InputAccessoryBuilder {
     public static func buildBlock(_ components: InputAccessoryView...) -> InputAccessoryViewGroup {
        InputAccessoryViewGroup(accessoryViews: components)
     }
+}
+
+public protocol InputBottomAccessoryViewProtocol: UIView {
+    var accessoryViews: [InputAccessoryView] { get set}
 }
 

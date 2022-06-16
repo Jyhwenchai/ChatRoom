@@ -32,7 +32,6 @@ class ChatViewModel {
         
         var contentSize: CGSize = .zero
         
-        let desc = message.string as NSString
         let style = NSMutableParagraphStyle()
         style.alignment = .left
         style.lineBreakMode = .byWordWrapping

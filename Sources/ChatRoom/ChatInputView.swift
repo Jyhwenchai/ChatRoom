@@ -20,12 +20,7 @@ public class ChatInputView: UIView {
     
     enum SelectAccessoryView: Equatable {
         case input
-        case selected(InputAccessoryView, AccessoryDirection)
-    }
-    
-    enum AccessoryDirection: Equatable {
-        case left
-        case right
+        case selected(InputAccessoryView)
     }
     
     /// 可能所有的组件视图都没有被选中，包括 TextField
@@ -59,10 +54,11 @@ public class ChatInputView: UIView {
     
     let lineView = UIView()
     let contentView = UIView()
-    var bottomAttachView: UIView? {
+    var bottomAccessoryView: InputBottomAccessoryViewProtocol? {
         didSet {
-            if let bottomAttachView {
-                addSubview(bottomAttachView)
+            if let bottomAccessoryView {
+                addAccessoryViews(bottomAccessoryView.accessoryViews)
+                addSubview(bottomAccessoryView)
             }
         }
     }
@@ -84,7 +80,6 @@ public class ChatInputView: UIView {
                 self.textViewDidChange(self.textView)
             }
             .store(in: &cancellable)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -94,11 +89,11 @@ public class ChatInputView: UIView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         
-        let bottomAttachSize = bottomAttachView?.sizeThatFits(.zero) ?? .zero
-        if let bottomAttachView {
-            bottomAttachView.frame = CGRect(x: 0, y: height - bottomAttachSize.height, width: width, height: bottomAttachSize.height)
+        let bottomAccessorySize = bottomAccessoryView?.sizeThatFits(.zero) ?? .zero
+        if let bottomAccessoryView {
+            bottomAccessoryView.frame = CGRect(x: 0, y: height - bottomAccessorySize.height, width: width, height: bottomAccessorySize.height)
         }
-        contentView.frame = CGRect(x: contentInsets.left, y: 0, width: width - contentInsets.left - contentInsets.right, height: height - bottomAttachSize.height)
+        contentView.frame = CGRect(x: contentInsets.left, y: 0, width: width - contentInsets.left - contentInsets.right, height: height - bottomAccessorySize.height)
         lineView.frame = CGRect(x: 0, y: 0, width: width, height: 1)
         
         var reduceWidth: CGFloat = 0
@@ -130,26 +125,34 @@ public class ChatInputView: UIView {
     
     public func addLeftAccessoryViews(@InputAccessoryBuilder _ viewBuilder: () -> InputAccessoryViewGroup) {
         leftAccessoryViewGroup = viewBuilder()
-        contentView.addSubview(leftAccessoryViewGroup!.titleGroupView())
-        leftAccessoryViewGroup?.selectedClosure = { [weak self] view in
-            guard let self = self else { return }
-            self.updateSelectedAccessoryView(view, direction: .left)
-        }
+        addAccessoryViews(from: leftAccessoryViewGroup!)
     }
     
     public func addRightAccessoryViews(@InputAccessoryBuilder _ viewBuilder: () -> InputAccessoryViewGroup) {
         rightAccessoryViewGroup = viewBuilder()
-        contentView.addSubview(rightAccessoryViewGroup!.titleGroupView())
-        rightAccessoryViewGroup?.selectedClosure = { [weak self] view in
-            guard let self = self else { return }
-            self.updateSelectedAccessoryView(view, direction: .right)
+        addAccessoryViews(from: rightAccessoryViewGroup!)
+    }
+    
+    func addAccessoryViews(from group: InputAccessoryViewGroup) {
+        contentView.addSubview(group.titleGroupView())
+        addAccessoryViews(group.accessoryViews)
+    }
+    
+    func addAccessoryViews(_ views: [InputAccessoryView]) {
+        for view in views {
+            if view.contentView == nil { continue }
+            view.action
+                .sink { [weak self] _ in
+                    guard let self = self else { return }
+                    self.updateSelectedAccessoryView(view)
+                }
+                .store(in: &cancellable)
         }
     }
     
-    func updateSelectedAccessoryView(_ accessoryView: InputAccessoryView, direction: AccessoryDirection) {
+    func updateSelectedAccessoryView(_ accessoryView: InputAccessoryView) {
         if selectAccessoryView == nil {
-            selectAccessoryView = .selected(accessoryView, direction)
-            accessoryView.titleView.isSelected = true
+            selectAccessoryView = .selected(accessoryView)
             delegate?.inputView(self, show: selectAccessoryView!, dismiss: nil)
             return
         }
@@ -157,16 +160,14 @@ public class ChatInputView: UIView {
         let oldSelectAccessoryView = selectAccessoryView!
         switch oldSelectAccessoryView {
         case .input:
-            selectAccessoryView = .selected(accessoryView, direction)
-            accessoryView.titleView.isSelected = true
-        case .selected(let currentAccessoryView, let currentDirection):
-            if direction == currentDirection, accessoryView.index == currentAccessoryView.index {
+            selectAccessoryView = .selected(accessoryView)
+        case .selected(let currentAccessoryView):
+            if accessoryView == currentAccessoryView {
                 selectAccessoryView = .input
+                textView.becomeFirstResponder()
             } else {
-                selectAccessoryView = .selected(accessoryView, direction)
-                accessoryView.titleView.isSelected = true
+                selectAccessoryView = .selected(accessoryView)
             }
-            currentAccessoryView.titleView.isSelected = false
         }
         delegate?.inputView(self, show: selectAccessoryView!, dismiss: oldSelectAccessoryView)
     }
@@ -177,9 +178,6 @@ public class ChatInputView: UIView {
 extension ChatInputView: UITextViewDelegate {
     
     public func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
-        if case let .selected(view, _) = selectAccessoryView {
-            view.titleView.isSelected = false
-        }
         let oldSelectAccessoryView = selectAccessoryView
         selectAccessoryView = .input
         delegate?.inputView(self, show: selectAccessoryView!, dismiss: oldSelectAccessoryView)
@@ -201,7 +199,7 @@ extension ChatInputView: UITextViewDelegate {
         textDidChangedClosure?(textView.attributedText)
         if let _ = textView.attributedText {
             let size = textView.sizeThatFits(CGSize(width: textView.width, height: 0))
-            let bottomAccessoryViewHeight = bottomAttachView?.sizeThatFits(.zero).height ?? 0
+            let bottomAccessoryViewHeight = bottomAccessoryView?.sizeThatFits(.zero).height ?? 0
             let viewHeight: CGFloat = min(max(ceil(size.height), minInputHeight), maxInputHeight) + bottomAccessoryViewHeight + inputMarginSpacing
             if viewHeight != height {
                 updateFrameClosure?(viewHeight)
@@ -213,10 +211,10 @@ extension ChatInputView: UITextViewDelegate {
 
 extension ChatInputView {
     var minHeight: CGFloat {
-        minInputHeight + inputMarginSpacing + (bottomAttachView?.sizeThatFits(.zero).height ?? 0)
+        minInputHeight + inputMarginSpacing + (bottomAccessoryView?.sizeThatFits(.zero).height ?? 0)
     }
     
     var maxHeight: CGFloat {
-        maxInputHeight + inputMarginSpacing + (bottomAttachView?.sizeThatFits(.zero).height ?? 0)
+        maxInputHeight + inputMarginSpacing + (bottomAccessoryView?.sizeThatFits(.zero).height ?? 0)
     }
 }

@@ -52,9 +52,9 @@ open class ChatRoomViewController: UIViewController {
     }
     
     //MARK: - Views
-    public var chatInputBottomAttachView: UIView? {
+    public var chatInputBottomAccessoryView: InputBottomAccessoryViewProtocol? {
         didSet {
-            chatInputView.bottomAttachView = chatInputBottomAttachView
+            chatInputView.bottomAccessoryView = chatInputBottomAccessoryView
             layoutViews()
         }
     }
@@ -538,17 +538,18 @@ extension ChatRoomViewController: InputViewDelegate {
     func hiddenAccessoryView(_ accessoryView: ChatInputView.SelectAccessoryView) {
         switch accessoryView {
         case .input: view.endEditing(true)
-        case let .selected(accessoryView, _):
-            accessoryView.titleView.isSelected = false
-            hiddenInputAccessoryContentView(accessoryView.contentView)
+        case let .selected(accessoryView):
+            guard let contentView = accessoryView.contentView else { return }
+            hiddenInputAccessoryContentView(contentView)
         }
     }
     
     func showAccessoryView(_ accessoryView: ChatInputView.SelectAccessoryView) {
-        if case let .selected(view, _) = accessoryView {
+        if case let .selected(view) = accessoryView {
             view.endEditing(true)
-            pingInputViewToBottom = view.contentView.position == .coverInput
-            showInputAccessoryContentView(view.contentView)
+            guard let contentView = view.contentView else { return }
+            pingInputViewToBottom = contentView.position == .coverInput
+            showInputAccessoryContentView(contentView)
             layoutTableView(with: inputAccessoryContentViewFrame)
             scrollTableViewContentToBottomWhenInputViewComponentWillShow()
         }
