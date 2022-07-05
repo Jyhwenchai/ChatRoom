@@ -327,7 +327,9 @@ open class ChatRoomViewController: UIViewController {
                 self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: false)
             }
         } else {
-            self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: true)
+            UIView.animate(withDuration: globalAnimateTimeInterval, delay: 0, options: componentAnimateType) {
+                self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: false)
+            }
         }
     }
     
