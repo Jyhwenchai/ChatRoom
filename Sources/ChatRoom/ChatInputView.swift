@@ -82,10 +82,32 @@ public class ChatInputView: UIView {
                 self.textViewDidChange(self.textView)
             }
             .store(in: &cancellable)
+        
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(textViewTapAction(recognizer:)))
+//        tapGesture.numberOfTapsRequired = 1
+//        textView.addGestureRecognizer(tapGesture)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc func textViewTapAction(recognizer: UITapGestureRecognizer) {
+        guard recognizer.state == .ended else { return }
+        textView.isEditable = true
+        textView.becomeFirstResponder()
+        let location = recognizer.location(in: textView)
+        if let position = textView.closestPosition(to: location) {
+            let uiTextRange = textView.textRange(from: position, to: position)
+            
+            if let start = uiTextRange?.start, let end = uiTextRange?.end {
+                let loc = textView.offset(from: textView.beginningOfDocument, to: position)
+                let length = textView.offset(from: start, to: end)
+                
+                textView.selectedRange = NSMakeRange(loc, length)
+                
+            }
+        }
     }
     
     public override func layoutSubviews() {

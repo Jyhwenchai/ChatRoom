@@ -400,6 +400,8 @@ extension ChatRoomViewController: UITableViewDataSource {
     open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         0
     }
+    
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {}
 }
 
 
