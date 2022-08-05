@@ -229,13 +229,31 @@ open class ChatRoomViewController: UIViewController {
     
     /// Call this method when receive new message
     public func layoutIfReceiveMessage() {
-        self.tableView.reloadData()
-        self.tableView.setNeedsLayout()
-        self.tableView.layoutIfNeeded()
+
+        let numberOfSession = tableView.numberOfRows(inSection: 0)
+        let indexPath = IndexPath(row: numberOfSession, section: 0)
+
+        var contentOffsetY = tableView.contentSize.height
+        // 1. only insert new cell
+        tableView.performBatchUpdates { [weak self] in
+            guard let self = self else { return }
+            self.tableView.insertRows(at: [indexPath], with: .none)
+        }
+
+        // 2. update tableView position
         self.layoutTableView(with: inputAccessoryContentViewFrame)
-        self.scrollTableViewContentToBottomWhenInputViewComponentWillShow()
+
+        // 3. check contentSize whether over tableView.height and update contentOffset
+        let safeAreaTop = tableView.safeAreaInsets.top
+        if tableView.contentSize.height + safeAreaTop > tableView.height {
+            let cellHeight = tableView(tableView, heightForRowAt: indexPath)
+            contentOffsetY += cellHeight - tableView.height
+            UIView.animate(withDuration: globalAnimateTimeInterval, delay: 0, options: componentAnimateType) {
+                self.tableView.setContentOffset(CGPoint(x: 0, y: contentOffsetY), animated: false)
+            }
+        }
     }
-    
+
     /// This method will layout tableView once when enter controller.
     public func layoutIfFirstLoadData() {
         defer { viewDidLayout = true }
@@ -244,21 +262,18 @@ open class ChatRoomViewController: UIViewController {
         // The default tableView.contentOffset.y value is -tableView.safeAreaInsets.top
         if hasHistoryMessage() {
             tableView.tableHeaderView = tableHeaderView
-            tableView.reloadData()
-            let cellHeight = calculateTableViewCellTotalHeight()
-            var offset = cellHeight + tableFooterHeight - tableView.height
-            offset += tableHeaderHeight
-            tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
-        } else {
-            tableView.reloadData()
-            let cellHeight = calculateTableViewCellTotalHeight()
-            let offset = cellHeight + tableFooterHeight - tableView.height
-            if offset <= tableView.contentOffset.y { return }
-            tableView.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
+        }
+        tableView.reloadData()
+        view.setNeedsLayout()
+        view.layoutIfNeeded()
+        let safeAreaTop = tableView.safeAreaInsets.top
+        if tableView.contentSize.height + safeAreaTop > tableView.height {
+            let contentOffsetY = tableView.contentSize.height - tableView.height
+            tableView.setContentOffset(CGPoint(x: 0, y: contentOffsetY), animated: false)
         }
     }
     
-    /// Update tableView frame when keyboard or inputView frame changed.
+    /// Update tableView position when keyboard or inputView frame changed.
     private func layoutTableView(with componentFrame: CGRect) {
         
         if componentFrame == .zero {
@@ -316,20 +331,8 @@ open class ChatRoomViewController: UIViewController {
             return
         }
         
-        if pingInputViewToBottom {
-            // By execute `scrollRectToVisible` method twice can fix scroll to bottom bug.
-            UIView.performWithoutAnimation {
-                self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: false)
-            }
-            tableView.setNeedsLayout()
-            tableView.layoutIfNeeded()
-            UIView.animate(withDuration: globalAnimateTimeInterval, delay: 0, options: componentAnimateType) {
-                self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: false)
-            }
-        } else {
-            UIView.animate(withDuration: globalAnimateTimeInterval, delay: 0, options: componentAnimateType) {
-                self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: false)
-            }
+        UIView.animate(withDuration: globalAnimateTimeInterval, delay: 0, options: componentAnimateType) {
+            self.tableView.scrollRectToVisible(self.tableView.tableFooterView!.frame, animated: false)
         }
     }
     
